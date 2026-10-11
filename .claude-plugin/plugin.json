@@ -1,0 +1,9 @@
+{
+  "name": "hms",
+  "version": "0.1.0",
+  "description": "Hold my spec: plan first, build on a go. Planning and Building phases, Change/Tweak/Bug intake, and a guard that keeps code untouched while planning.",
+  "author": {
+    "name": "Ned Western"
+  },
+  "repository": "https://github.com/NedJWestern/hold-my-spec"
+}

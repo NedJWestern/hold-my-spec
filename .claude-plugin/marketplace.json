@@ -1,0 +1,13 @@
+{
+  "name": "hold-my-spec",
+  "owner": {
+    "name": "Ned Western"
+  },
+  "plugins": [
+    {
+      "name": "hms",
+      "source": "./"
+    }
+  ],
+  "description": "Hold my spec: a plan-then-build workflow for Claude Code."
+}
