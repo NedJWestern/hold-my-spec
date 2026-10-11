@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from 'claude-code/testing'
-import type { CommandRunInput, On } from 'claude-code'
+import type { CommandRunInput, On, TurnCompleteInput } from 'claude-code'
 import { endsBuild } from './register'
 
 const ROOT = '/proj'
@@ -15,6 +15,8 @@ function world(on: On) {
   })
   // Stands for the engine running a command's markdown prompt.
   on('command.run', () => ({ text: '' }))
+  // Stands for the engine finishing a turn with its reply.
+  on('turn.complete', ($, e) => ({ text: e.answer }))
   return { status }
 }
 
@@ -24,6 +26,16 @@ const typed = (command: string, args = ''): CommandRunInput => ({
   args,
   origin: { kind: 'composer' },
   presentation: { isFullscreen: false, columns: 80 },
+})
+
+/** A turn's final reply, from the main conversation unless a subagent is named. */
+const turn = (answer: string, agentId?: string): TurnCompleteInput => ({
+  answer,
+  agentId,
+  durationMs: 0,
+  isAborted: false,
+  turnId: 'turn-1',
+  reason: 'answer',
 })
 
 describe('endsBuild', () => {
@@ -47,5 +59,15 @@ describe('modes', () => {
     await $.command.run(typed('hms:discuss'))
     // Claude Code already labels a plugin's status line with its name, so the text is the mode alone.
     expect(status).toEqual(['plan', 'build', 'discuss'])
+  })
+
+  test("a build returns to discuss on the main conversation's marker, not a subagent's", async ($, on) => {
+    const { status } = world(on)
+    await $.command.run(typed('hms:build'))
+    await $.turn.complete(turn('Which name do you prefer?'))
+    await $.turn.complete(turn('Done.\nhms: build complete', 'agent-1'))
+    expect(status).toEqual(['build'])
+    await $.turn.complete(turn('Built the error report.\n\nhms: build complete'))
+    expect(status).toEqual(['build', 'discuss'])
   })
 })
