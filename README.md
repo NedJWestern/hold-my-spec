@@ -67,3 +67,7 @@ There are no guards yet: the modes are instructions Claude follows, not restrict
 claude plugin validate .
 claude plugin test .
 ```
+
+## License
+
+MIT, see [LICENSE](LICENSE).
