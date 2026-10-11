@@ -9,5 +9,5 @@
       "source": "./"
     }
   ],
-  "description": "Hold my spec: a plan-then-build workflow for Claude Code."
+  "description": "Hold my spec: discuss, plan and build modes for spec-driven development in Claude Code."
 }
