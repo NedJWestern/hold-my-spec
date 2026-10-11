@@ -6,7 +6,7 @@ argument-hint: "[what to plan]"
 hms: Plan mode. Plan: $ARGUMENTS
 
 Rules in plan mode:
-- Shape ideas into the spec (the project's CLAUDE.md says where it lives). Don't change code, and don't run anything slow; quick read-only investigation is fine (read code, reproduce in a scratch area outside the repo).
+- Shape ideas into the spec: by default `spec/requirements.md` (what, with requirement IDs), `spec/design.md` (how) and `spec/tasks.md` (the work and backlog), unless the project's CLAUDE.md says otherwise. Don't change code, and don't run anything slow; quick read-only investigation is fine (read code, reproduce in a scratch area outside the repo).
 - Sort each item by asking which side is wrong, the spec or the code:
   - Change: new or different behaviour (the spec is wrong or silent). Add or update a requirement and the design, with a line or two of acceptance criteria.
   - Tweak: wording or layout, same behaviour. Agree the exact change; design only.
