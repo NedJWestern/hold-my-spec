@@ -20,7 +20,7 @@ Answer `y` to add the marketplace, then pick a scope.
 
 - A project starts in discuss.
 - After `/hms:build`, the project always returns to discuss by itself, whether the build finished or stopped because it was blocked. You review the report there, then choose what's next: `/hms:plan` to sort out what blocked it, or `/hms:build` again.
-- The current mode is shown in the status line: `hms: discuss`, `hms: plan` or `hms: build`.
+- The current mode is shown in the status line as `hms: discuss`, `hms: plan` or `hms: build` (Claude Code adds the `hms:` label).
 - Only you can run these commands; Claude can't switch modes on its own.
 - Text after a command is passed to Claude as-is, e.g. `/hms:plan the error report`.
 

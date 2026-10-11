@@ -27,12 +27,12 @@ async function getMode($: EngineInterface): Promise<Mode> {
 
 async function setMode($: EngineInterface, mode: Mode): Promise<void> {
   await $.store.set(modeKey(await $.session.root()), mode)
-  $.ui.status(`hms: ${mode}`)
+  $.ui.status(mode) // Claude Code labels it "hms:" itself
 }
 
 export const register: Register = (on) => {
   on('session.start', async ($, e, next) => {
-    $.ui.status(`hms: ${await getMode($)}`)
+    $.ui.status(await getMode($))
     return next(e)
   })
 

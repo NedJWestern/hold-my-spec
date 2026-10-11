@@ -45,6 +45,7 @@ describe('modes', () => {
     await $.command.run(typed('hms:plan', 'the error report'))
     await $.command.run(typed('hms:build'))
     await $.command.run(typed('hms:discuss'))
-    expect(status).toEqual(['hms: plan', 'hms: build', 'hms: discuss'])
+    // Claude Code already labels a plugin's status line with its name, so the text is the mode alone.
+    expect(status).toEqual(['plan', 'build', 'discuss'])
   })
 })

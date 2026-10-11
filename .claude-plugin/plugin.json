@@ -1,6 +1,6 @@
 {
   "name": "hms",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Hold my spec: discuss, plan and build modes, so Claude works at the pace you expect and builds only on your go.",
   "author": {
     "name": "Ned Western"
