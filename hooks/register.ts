@@ -1,73 +1,60 @@
-// hold-my-spec (hms): spec-driven development with an explicit gate between planning and building.
+// hold-my-spec (hms): three modes, discuss (the default), plan and build.
 //
-// The commands themselves are markdown prompts in ../commands (/hms:planning, /hms:building,
-// /hms:change, /hms:tweak, /hms:bug). This module only:
-// - records the project's phase when one of them runs (building for /hms:building, planning
-//   for the rest), and
-// - while a project is in planning, refuses edits to files outside its spec.
+// The commands are markdown prompts in ../commands (/hms:discuss, /hms:plan, /hms:build). This
+// module only keeps the project's mode:
+// - each command records its mode, then runs as usual;
+// - a build returns the project to discuss once its final reply ends with
+//   "hms: build complete" or "hms: build stopped";
+// - the mode is shown in the status line.
 //
-// The phase is kept per project root in the plugin's store. A project that never ran an
-// /hms command has no phase, and the guard leaves it alone.
+// The mode is kept per project root in the plugin's store. No mode recorded means discuss.
 import type { EngineInterface, Register } from 'claude-code'
 
-export type Phase = 'planning' | 'building'
+export type Mode = 'discuss' | 'plan' | 'build'
 
-/** Paths, relative to the project root, that may change while planning. */
-export const PLANNING_PATHS = ['spec/', 'CLAUDE.md', 'README.md']
+const modeKey = (root: string) => `mode:${root}`
 
-const phaseKey = (root: string) => `phase:${root}`
-
-/** Whether `path` may be edited while planning: outside the project, or one of its spec paths. */
-export function editableWhilePlanning(root: string, path: string): boolean {
-  const base = root.endsWith('/') ? root : `${root}/`
-  const abs = path.startsWith('/') ? path : base + path
-  if (!abs.startsWith(base)) return true
-  const rel = abs.slice(base.length)
-  return PLANNING_PATHS.some((p) => (p.endsWith('/') ? rel.startsWith(p) : rel === p))
+/** Whether a reply ends a build: its last line is the build's closing marker. */
+export function endsBuild(answer: string): boolean {
+  const last = answer.trimEnd().split('\n').at(-1)?.trim() ?? ''
+  return last === 'hms: build complete' || last === 'hms: build stopped'
 }
 
-async function refusal($: EngineInterface, path: string): Promise<{ deny: string } | undefined> {
-  const root = await $.session.root()
-  if ((await $.store.get(phaseKey(root))) !== 'planning') return undefined
-  if (editableWhilePlanning(root, path)) return undefined
-  return {
-    deny: `hms: planning phase: only the spec may change (${PLANNING_PATHS.join(', ')}), not ${path}. Record the plan in the spec instead, or ask the owner to run /hms:building.`,
-  }
+async function getMode($: EngineInterface): Promise<Mode> {
+  const value = await $.store.get(modeKey(await $.session.root()))
+  return value === 'plan' || value === 'build' ? value : 'discuss'
 }
 
-const guardFailed = { deny: 'hms: the planning guard failed, so the edit is refused.' }
+async function setMode($: EngineInterface, mode: Mode): Promise<void> {
+  await $.store.set(modeKey(await $.session.root()), mode)
+  $.ui.status(`hms: ${mode}`)
+}
 
 export const register: Register = (on) => {
-  // Each command records its phase, then runs as usual (its markdown prompt).
-  on('command.run', { command: 'hms:planning' }, async ($, e, next) => {
-    await $.store.set(phaseKey(await $.session.root()), 'planning')
-    return next(e)
-  })
-  on('command.run', { command: 'hms:change' }, async ($, e, next) => {
-    await $.store.set(phaseKey(await $.session.root()), 'planning')
-    return next(e)
-  })
-  on('command.run', { command: 'hms:tweak' }, async ($, e, next) => {
-    await $.store.set(phaseKey(await $.session.root()), 'planning')
-    return next(e)
-  })
-  on('command.run', { command: 'hms:bug' }, async ($, e, next) => {
-    await $.store.set(phaseKey(await $.session.root()), 'planning')
-    return next(e)
-  })
-  on('command.run', { command: 'hms:building' }, async ($, e, next) => {
-    await $.store.set(phaseKey(await $.session.root()), 'building')
+  on('session.start', async ($, e, next) => {
+    $.ui.status(`hms: ${await getMode($)}`)
     return next(e)
   })
 
-  // The guard: while planning, only the spec may change. If it fails, it refuses.
-  on('tool.call', { tool: 'Edit' }, async ($, e, next) => (await refusal($, e.file_path)) ?? next(e)).catch(
-    ($, e, next) => (next.called ? next(e) : guardFailed),
-  )
-  on('tool.call', { tool: 'Write' }, async ($, e, next) => (await refusal($, e.file_path)) ?? next(e)).catch(
-    ($, e, next) => (next.called ? next(e) : guardFailed),
-  )
-  on('tool.call', { tool: 'NotebookEdit' }, async ($, e, next) =>
-    (await refusal($, e.notebook_path)) ?? next(e),
-  ).catch(($, e, next) => (next.called ? next(e) : guardFailed))
+  // Each command records its mode, then runs as usual (its markdown prompt).
+  on('command.run', { command: 'hms:discuss' }, async ($, e, next) => {
+    await setMode($, 'discuss')
+    return next(e)
+  })
+  on('command.run', { command: 'hms:plan' }, async ($, e, next) => {
+    await setMode($, 'plan')
+    return next(e)
+  })
+  on('command.run', { command: 'hms:build' }, async ($, e, next) => {
+    await setMode($, 'build')
+    return next(e)
+  })
+
+  // A build ends when the main conversation's reply closes with the marker.
+  on('turn.complete', async ($, e, next) => {
+    if (e.agentId === undefined && endsBuild(e.answer) && (await getMode($)) === 'build') {
+      await setMode($, 'discuss')
+    }
+    return next(e)
+  })
 }

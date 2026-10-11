@@ -1,7 +1,7 @@
 {
   "name": "hms",
-  "version": "0.1.0",
-  "description": "Hold my spec: plan first, build on a go. Planning and Building phases, Change/Tweak/Bug intake, and a guard that keeps code untouched while planning.",
+  "version": "0.2.0",
+  "description": "Hold my spec: discuss, plan and build modes, so Claude works at the pace you expect and builds only on your go.",
   "author": {
     "name": "Ned Western"
   },
