@@ -1,5 +1,6 @@
 ---
 description: New Bug (code doesn't do what the spec says) - investigate read-only
+disable-model-invocation: true
 argument-hint: "<what you saw>"
 ---
 hms: New Bug (planning phase): $ARGUMENTS

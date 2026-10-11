@@ -1,5 +1,6 @@
 ---
 description: New Tweak (wording or layout, same behaviour) - propose the exact change
+disable-model-invocation: true
 argument-hint: "<what>"
 ---
 hms: New Tweak (planning phase): $ARGUMENTS

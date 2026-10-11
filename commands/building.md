@@ -1,5 +1,6 @@
 ---
 description: Switch to the Building phase and build approved (Ready) backlog items
+disable-model-invocation: true
 argument-hint: "[items]"
 ---
 hms: Building phase. Build these Ready backlog items: $ARGUMENTS (if none are named, every item in Ready).

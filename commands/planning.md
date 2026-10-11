@@ -1,5 +1,6 @@
 ---
 description: Switch to the Planning phase - shape backlog items and the spec, no code changes
+disable-model-invocation: true
 argument-hint: "[topic]"
 ---
 hms: Planning phase. Topic: $ARGUMENTS

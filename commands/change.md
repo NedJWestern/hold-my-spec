@@ -1,5 +1,6 @@
 ---
 description: New Change (new or different behaviour) - draft its requirement and design
+disable-model-invocation: true
 argument-hint: "<idea>"
 ---
 hms: New Change (planning phase): $ARGUMENTS
