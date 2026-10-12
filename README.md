@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/hms.jpg" alt="HMS Hold My Spec, a tall ship under full sail in a storm" width="200">
+</p>
+
 # hold my spec
 
 A Claude Code plugin for spec-driven development with three modes, so Claude works at the pace you expect: chatting when you're discussing, writing the spec when you're planning, and building without interruptions when you've said go.
