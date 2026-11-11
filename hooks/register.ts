@@ -8,11 +8,13 @@
 //   a meeting);
 // - while in a meeting, adds the meeting rules to the system prompt;
 // - shows "meeting" or "working" in the status line;
-// - stays out of the way entirely when HOLD_MY_SPEC_DISABLE=1 (scripts, scheduled jobs).
+// - stays out of the way entirely when nobody is at the prompt (a `claude -p` run, the SDK) or
+//   HOLD_MY_SPEC_DISABLE=1 is set.
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 const isWorking = atom({ plugin: 'hms', key: 'isWorking' } as const, false)
+const isUnattended = atom({ plugin: 'hms', key: 'isUnattended' } as const, false)
 
 /** The meeting rules Claude follows while in a meeting. */
 export function meetingRules(thresholdSeconds: number): string {
@@ -27,9 +29,9 @@ export function meetingRules(thresholdSeconds: number): string {
   ].join('\n')
 }
 
-/** Whether meeting mode is switched off for this run (scripts, scheduled jobs). */
+/** Whether meeting mode is off for this run: nobody at the prompt, or switched off by the variable. */
 async function isDisabled($: EngineInterface): Promise<boolean> {
-  return (await $.env.get('HOLD_MY_SPEC_DISABLE')) === '1'
+  return (await read($, isUnattended)) || (await $.env.get('HOLD_MY_SPEC_DISABLE')) === '1'
 }
 
 async function setWorking($: EngineInterface, working: boolean): Promise<void> {
@@ -41,6 +43,7 @@ export const register: Register = (on, options) => {
   const thresholdSeconds = Number(options.thresholdSeconds ?? 60)
 
   on('session.start', async ($, e, next) => {
+    await update($, isUnattended, () => !e.isInteractive)
     if (!(await isDisabled($))) {
       $.ui.status((await read($, isWorking)) ? 'working' : 'meeting')
     }

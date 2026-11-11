@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from 'claude-code/testing'
-import type { CommandRunInput, EngineInterface, On, PromptComposeInput } from 'claude-code'
+import type { CommandRunInput, EngineInterface, On, PromptComposeInput, SessionStartInput } from 'claude-code'
 import { meetingRules } from './register'
 
 /** The world beneath the plugin: an environment, a status line, a system prompt, and commands that just run. */
@@ -12,6 +12,8 @@ function world(on: On, env: Record<string, string> = {}) {
   })
   // Stands for the engine running a command's markdown prompt.
   on('command.run', () => ({ text: '' }))
+  // Stands for the engine starting the session.
+  on('session.start', ($, e) => ({ cwd: e.cwd }))
   // Stands for the engine's own system prompt.
   on('prompt.compose', () => ({ sections: [{ id: 'intro', text: 'You are Claude Code.', scope: 'shared' }] }))
   return { status }
@@ -23,6 +25,13 @@ const typed = (command: string, args = ''): CommandRunInput => ({
   args,
   origin: { kind: 'composer' },
   presentation: { isFullscreen: false, columns: 80 },
+})
+
+/** A session starting, with or without a person at the prompt. */
+const started = (isInteractive: boolean): SessionStartInput => ({
+  cwd: '/proj',
+  surface: isInteractive ? 'terminal' : null,
+  isInteractive,
 })
 
 /** A system prompt render, as the engine asks for one. */
@@ -77,5 +86,19 @@ describe('meeting mode', () => {
     await $.command.run(typed('hms:meeting-on'))
     expect(await sectionIds($)).toEqual(['intro'])
     expect(status).toEqual([])
+  })
+
+  test('a run with nobody at the prompt never starts in a meeting', async ($, on) => {
+    const { status } = world(on)
+    await $.session.start(started(false))
+    expect(await sectionIds($)).toEqual(['intro'])
+    expect(status).toEqual([])
+  })
+
+  test('an interactive session starts in a meeting', async ($, on) => {
+    const { status } = world(on)
+    await $.session.start(started(true))
+    expect(await sectionIds($)).toEqual(['intro', 'hms:meeting'])
+    expect(status).toEqual(['meeting'])
   })
 })

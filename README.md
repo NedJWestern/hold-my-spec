@@ -16,7 +16,7 @@ Answer `y` to add the marketplace, then pick a scope.
 
 ## How a meeting works
 
-- **Every new conversation starts in a meeting.**
+- **Every new conversation starts in a meeting,** unless nobody is at the prompt (see Settings).
 - **Quick actions are allowed.** During a meeting Claude may do anything it estimates will take less than the threshold (60 seconds by default), such as reading a file or making a quick web request. No tool is banned outright.
 - **Long actions are deferred.** Claude doesn't start anything it estimates will take longer. It adds it to the meeting to-do list instead.
 - **These are estimates, not enforcement.** Claude judges the duration itself, and nothing times it out.
@@ -40,7 +40,7 @@ Only you can run these commands; Claude can't end a meeting by itself.
 | Quick-action threshold (seconds) | 60 | `/config`, under the hms plugin (`thresholdSeconds`) |
 | Turn meeting mode off | off | Environment variable `HOLD_MY_SPEC_DISABLE=1` |
 
-Scripts, scheduled jobs and other runs with nobody present should set `HOLD_MY_SPEC_DISABLE=1`, or they would wait forever for a meeting to end.
+Runs with nobody at the prompt (`claude -p`, the SDK) never start in a meeting, so they can't wait forever for one to end. Set `HOLD_MY_SPEC_DISABLE=1` to turn meeting mode off anywhere else.
 
 ## How it works
 
