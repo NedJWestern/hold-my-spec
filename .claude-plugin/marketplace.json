@@ -9,5 +9,5 @@
       "source": "./"
     }
   ],
-  "description": "Hold my spec: discuss, plan and build modes for spec-driven development in Claude Code."
+  "description": "Hold my spec: meeting mode for Claude Code, so Claude talks first and does long work only once the meeting is over."
 }

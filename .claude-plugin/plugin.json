@@ -1,10 +1,19 @@
 {
   "name": "hms",
-  "version": "0.2.2",
-  "description": "Hold my spec: discuss, plan and build modes, so Claude works at the pace you expect and builds only on your go.",
+  "version": "0.3.0",
+  "description": "Hold my spec: meeting mode for Claude Code. Talk and plan first; long work waits on a to-do list until you end the meeting.",
   "author": {
     "name": "Ned Western"
   },
   "repository": "https://github.com/NedJWestern/hold-my-spec",
-  "license": "MIT"
+  "license": "MIT",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "thresholdSeconds": {
+      "type": "number",
+      "title": "Quick-action threshold (seconds)",
+      "description": "During a meeting, Claude only starts actions it estimates will take less than this.",
+      "default": 60
+    }
+  }
 }
